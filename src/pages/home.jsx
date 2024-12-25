@@ -26,7 +26,7 @@ const Home = () => {
   });
   const [allnotes,setallnotes]=useState([])
   const [userInfo,setuserInfo]=useState(null);
-
+  const [isSearch,setisSearch]=useState(false);
 
 
   const navigate=useNavigate();
@@ -88,7 +88,26 @@ const handleclosetoast=()=>{
   }
 
  } 
-
+const onSearchNote=async(query)=>{
+  console.log("Searching notes with query:", query); 
+  if (!query) {
+    // Reset to show all notes if the search query is empty
+    setisSearch(false);
+    getAllnotes();
+    return;
+}
+  try{
+    const response=await axiosinstance.get("/search-notes",{
+      params:{query},
+    })
+    if(response.data && response.data.notes){
+      setisSearch(true);
+      setallnotes(response.data.notes);
+    }
+  }catch(error){
+    console.log(error);
+  }
+}
 
   useEffect(()=>{
     getAllnotes();
@@ -98,7 +117,7 @@ const handleclosetoast=()=>{
 
   return (
     <>
-      <Navbar userInfo={userInfo} />
+      <Navbar userInfo={userInfo} onSearchNote={onSearchNote} />
       <div className="container mx-auto px-4 sm:px-8">
         {allnotes.length>0?(
         <div className="grid grid-cols-3 gap-4 mt-8">
