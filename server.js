@@ -230,7 +230,33 @@ app.put("/update-ispinned/:noteId",authenticatetoken,async(req,res)=>{
         })
     }
 })
-
+app.get("/search-notes",authenticatetoken,async(req,res)=>{
+    const userId=req.user._id;
+    const {query}=req.query;
+    if(!query){
+        return res.status(400)
+        .json({error:true,message:"Search query is requires"});
+    }
+    try{
+        const matchnotes=await Note.find({
+            userId,
+            $or:[
+                {title:{$regex:new RegExp(query,"i")}},
+                {content:{$regex:new RegExp(query,"i")}},
+            ],
+        });
+        return res.json({
+            error:false,
+            notes:matchnotes,
+            message:"Notes matching the search query retrieved successfully",
+        })
+    }catch(error){
+        return res.status(500).json({
+            error:true,
+            message:"Internal Server Error"
+        })
+    }
+})
 app.get("/test", (req, res) => {
     res.json("jcbjhshfvcbvvvvv");
 });
